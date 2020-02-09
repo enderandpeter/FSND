@@ -1,3 +1,24 @@
+# My Fyyur Submission
+
+## Installation
+Unzip somewhere on your filesystem, or [download from Github](https://github.com/enderandpeter/FSND/tree/master/projects/01_fyyur/starter_code).
+
+## Requirements
+
+Tested with Python 3.7
+
+Install the required packages, such as with `pip3 install -r requirements.txt` as noted below.
+
+## Deployment
+
+1. Set the environment variables:
+
+   * `FLASK_APP=app.py`
+   * `LC_TIME=en_US` If not already set to your locale
+2. Run `flask db upgrade` to run all the migrations
+3. Run `flask run` to start the development server
+
+
 Fyyur
 -----
 
