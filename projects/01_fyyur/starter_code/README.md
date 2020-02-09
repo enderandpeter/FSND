@@ -1,7 +1,7 @@
 # My Fyyur Submission
 
 ## Installation
-Unzip somewhere on your filesystem, or [download from Github](https://github.com/enderandpeter/FSND/tree/master/projects/01_fyyur/starter_code).
+Unzip somewhere on your filesystem, or [download from Github](https://github.com/enderandpeter/FSND/tree/my-fyyur/projects/01_fyyur/starter_code).
 
 ## Requirements
 
@@ -17,7 +17,6 @@ Install the required packages, such as with `pip3 install -r requirements.txt` a
    * `LC_TIME=en_US` If not already set to your locale
 2. Run `flask db upgrade` to run all the migrations
 3. Run `flask run` to start the development server
-
 
 Fyyur
 -----
