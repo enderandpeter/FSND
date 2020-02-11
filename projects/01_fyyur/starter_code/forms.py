@@ -18,7 +18,7 @@ class ShowForm(FlaskForm):
 
 class VenueForm(FlaskForm):
     name = StringField(
-        'name', validators=[DataRequired()]
+        'Name', validators=[DataRequired()]
     )
     city = StringField(
         'city', validators=[DataRequired()]
@@ -80,17 +80,17 @@ class VenueForm(FlaskForm):
         ]
     )
     address = StringField(
-        'address', validators=[DataRequired()]
+        'Address', validators=[DataRequired()]
     )
     phone = StringField(
-        'phone'
+        'Phone'
     )
     image_link = StringField(
-        'image_link'
+        'Image Link'
     )
     genres = SelectMultipleField(
         # TODO implement enum restriction
-        'genres', validators=[DataRequired()],
+        'Genres', validators=[DataRequired()],
         choices=[
             ('Alternative', 'Alternative'),
             ('Blues', 'Blues'),
@@ -114,7 +114,7 @@ class VenueForm(FlaskForm):
         ]
     )
     facebook_link = StringField(
-        'facebook_link', validators=[URL()]
+        'Facebook Link', validators=[URL()]
     )
 
 class ArtistForm(FlaskForm):

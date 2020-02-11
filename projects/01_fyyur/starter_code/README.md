@@ -11,6 +11,9 @@ Install the required packages, such as with `pip3 install -r requirements.txt` a
 
 ## Deployment
 
+1. Copy `config.py.example` to `config.py` if it does not yet exist. You may set Flask config variables here if you wish.
+1. Create the database you will use for this project
+and set `SQLALCHEMY_DATABASE_URI` in `config.py` to a DB URI.
 1. Set the environment variables:
 
    * `FLASK_APP=app.py`
