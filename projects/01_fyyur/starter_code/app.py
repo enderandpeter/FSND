@@ -3,6 +3,9 @@
 # ----------------------------------------------------------------------------#
 
 import json
+
+from sqlalchemy import text
+
 import config
 import dateutil.parser
 import babel
@@ -115,6 +118,7 @@ def index():
 def venues():
     # TODO: replace with real venues data.
     #       num_shows should be aggregated based on number of upcoming shows per venue.
+    """
     data = [{
         "city": "San Francisco",
         "state": "CA",
@@ -136,6 +140,42 @@ def venues():
             "num_upcoming_shows": 0,
         }]
     }]
+    """
+    error = False
+    data = []
+    try:
+        venue_rows = Venue.query.order_by(text("concat(city, ', ', state)")).all()
+        row = {
+            'city': '',
+            'state': '',
+            'venues': []
+        }
+        for venue in venue_rows:
+            if not (venue.city == row['city'] and venue.state == row['state']):
+                if len(row['city']) > 0:
+                    data.append(row)
+
+                row = {
+                'city': venue.city,
+                'state': venue.state,
+                    'venues': []
+                }
+
+            row['venues'].append({
+                'id': venue.id,
+                'name': venue.name
+            })
+
+        data.append(row)
+    except:
+        error = True
+        print(sys.exc_info())
+    finally:
+        db.session.close()
+    if error:
+        flash('There was an error retrieving the venues')
+        redirect(url_for('create_venue_form'))
+
     return render_template('pages/venues.html', areas=data)
 
 
