@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField
-from wtforms.validators import DataRequired, AnyOf, URL
+from wtforms.validators import DataRequired, AnyOf, URL, Optional
 
 class ShowForm(FlaskForm):
     artist_id = StringField(
@@ -86,7 +86,7 @@ class VenueForm(FlaskForm):
         'Phone'
     )
     image_link = StringField(
-        'Image Link'
+        'Image Link', validators=[URL(), Optional(strip_whitespace=True)]
     )
     genres = SelectMultipleField(
         # TODO implement enum restriction
@@ -114,18 +114,18 @@ class VenueForm(FlaskForm):
         ]
     )
     facebook_link = StringField(
-        'Facebook Link', validators=[URL()]
+        'Facebook Link', validators=[URL(), Optional(strip_whitespace=True)]
     )
 
 class ArtistForm(FlaskForm):
     name = StringField(
-        'name', validators=[DataRequired()]
+        'Name', validators=[DataRequired()]
     )
     city = StringField(
-        'city', validators=[DataRequired()]
+        'City', validators=[DataRequired()]
     )
     state = SelectField(
-        'state', validators=[DataRequired()],
+        'State', validators=[DataRequired()],
         choices=[
             ('AL', 'AL'),
             ('AK', 'AK'),
@@ -181,15 +181,14 @@ class ArtistForm(FlaskForm):
         ]
     )
     phone = StringField(
-        # TODO implement validation logic for state
-        'phone'
+        'Phone'
     )
     image_link = StringField(
-        'image_link'
+        'Image Link', validators=[URL(), Optional(strip_whitespace=True)]
     )
     genres = SelectMultipleField(
         # TODO implement enum restriction
-        'genres', validators=[DataRequired()],
+        'Genres', validators=[DataRequired()],
         choices=[
             ('Alternative', 'Alternative'),
             ('Blues', 'Blues'),
@@ -214,7 +213,5 @@ class ArtistForm(FlaskForm):
     )
     facebook_link = StringField(
         # TODO implement enum restriction
-        'facebook_link', validators=[URL()]
+        'Facebook Link', validators=[URL(), Optional(strip_whitespace=True)]
     )
-
-# TODO IMPLEMENT NEW ARTIST FORM AND NEW SHOW FORM
