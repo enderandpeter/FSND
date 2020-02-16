@@ -222,6 +222,7 @@ def show_venue(venue_id):
 
         data['past_shows_count'] = len(data['past_shows'])
         data['upcoming_shows_count'] = len(data['upcoming_shows'])
+        data['edit_url'] = url_for('edit_venue', **{'venue_id': venue_id})
     except:
         error = True
         print(sys.exc_info())
