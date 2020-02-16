@@ -358,6 +358,24 @@ def show_artist(artist_id):
             data['past_shows'] = []
             data['upcoming_shows'] = []
 
+        else:
+            data['past_shows'] = [
+                {
+                    "venue_id": show.venue_id,
+                    "venue_name": show.venue.name,
+                    "venue_image_link": show.venue.image_link,
+                    "show_at": show.show_at.isoformat()
+                } for show in artist.shows if show.show_at < datetime.now(timezone.utc)
+            ]
+
+            data['upcoming_shows'] = [
+                {
+                    "venue_id": show.venue_id,
+                    "venue_name": show.venue.name,
+                    "venue_image_link": show.venue.image_link,
+                    "show_at": show.show_at.isoformat()
+                } for show in artist.shows if show.show_at >= datetime.now(timezone.utc)
+            ]
         data['past_shows_count'] = len(data['past_shows'])
         data['upcoming_shows_count'] = len(data['upcoming_shows'])
     except:
