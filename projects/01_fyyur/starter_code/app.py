@@ -8,6 +8,7 @@ from sqlalchemy import text
 
 import config
 import dateutil.parser
+from datetime import timezone
 import babel
 from flask import Flask, render_template, request, Response, flash, redirect, url_for
 from flask_migrate import Migrate
@@ -200,6 +201,24 @@ def show_venue(venue_id):
         if len(venue.shows) == 0:
             data['past_shows'] = []
             data['upcoming_shows'] = []
+        else:
+            data['past_shows'] = [
+                {
+                    "artist_id": show.artist_id,
+                    "artist_name": show.artist.name,
+                    "artist_image_link": show.artist.image_link,
+                    "show_at": show.show_at.isoformat()
+                } for show in venue.shows if show.show_at < datetime.now(timezone.utc)
+            ]
+
+            data['upcoming_shows'] = [
+                {
+                    "artist_id": show.artist_id,
+                    "artist_name": show.artist.name,
+                    "artist_image_link": show.artist.image_link,
+                    "show_at": show.show_at.isoformat()
+                } for show in venue.shows if show.show_at >= datetime.now(timezone.utc)
+            ]
 
         data['past_shows_count'] = len(data['past_shows'])
         data['upcoming_shows_count'] = len(data['upcoming_shows'])
@@ -274,8 +293,6 @@ def delete_venue(venue_id):
 #  ----------------------------------------------------------------
 @app.route('/artists')
 def artists():
-    # TODO: replace with real data returned from querying the database
-
     error = False
     data = []
     try:
@@ -301,7 +318,7 @@ def artists():
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
     # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
-    # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
+    # search for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
     # search for "band" should return "The Wild Sax Band".
     response = {
         "count": 1,
@@ -317,8 +334,7 @@ def search_artists():
 
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
-    # shows the venue page with the given venue_id
-    # TODO: replace with real venue data from the venues table, using venue_id
+    # shows the artist page
 
     error = False
     data = {}
@@ -509,8 +525,6 @@ def create_shows():
 @app.route('/shows/create', methods=['POST'])
 def create_show_submission():
     # called to create new shows in the db, upon submitting new show listing form
-    # TODO: insert form data as a new Show record in the db, instead
-
     form = ShowForm()
 
     if not form.validate_on_submit():
