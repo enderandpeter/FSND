@@ -5,13 +5,13 @@ from wtforms.validators import DataRequired, AnyOf, URL, Optional
 
 class ShowForm(FlaskForm):
     artist_id = StringField(
-        'artist_id'
+        'Artist ID'
     )
     venue_id = StringField(
-        'venue_id'
+        'Venue ID'
     )
-    start_time = DateTimeField(
-        'start_time',
+    show_at = DateTimeField(
+        'Show Time',
         validators=[DataRequired()],
         default= datetime.today()
     )
@@ -185,6 +185,9 @@ class ArtistForm(FlaskForm):
     )
     image_link = StringField(
         'Image Link', validators=[URL(), Optional(strip_whitespace=True)]
+    )
+    website = StringField(
+        'Website', validators=[URL(), Optional(strip_whitespace=True)]
     )
     genres = SelectMultipleField(
         # TODO implement enum restriction

@@ -151,7 +151,7 @@ def venues():
 
     if error:
         flash('There was an error retrieving the venues')
-        redirect(url_for('create_venue_form'))
+        return redirect(url_for('create_venue_form'))
 
     return render_template('pages/venues.html', areas=data)
 
@@ -211,7 +211,7 @@ def show_venue(venue_id):
 
     if error:
         flash(f'Could not find venue with id {venue_id}')
-        redirect(url_for('venues'))
+        return redirect(url_for('venues'))
 
     return render_template('pages/show_venue.html', venue=data)
 
@@ -249,9 +249,10 @@ def create_venue_submission():
         print(sys.exc_info())
     finally:
         db.session.close()
+
     if error:
         flash('There was an error saving the venue')
-        redirect(url_for('create_venue_form'))
+        return redirect(url_for('create_venue_form'))
 
     # on successful db insert, flash success
     flash('Venue ' + request.form['name'] + ' was successfully listed!')
@@ -292,7 +293,7 @@ def artists():
 
     if error:
         flash('There was an error retrieving the artists')
-        redirect(url_for('create_artist_form'))
+        return redirect(url_for('create_artist_form'))
 
     return render_template('pages/artists.html', artists=data)
 
@@ -351,7 +352,7 @@ def show_artist(artist_id):
 
     if error:
         flash(f'Could not find artist with id {artist_id}')
-        redirect(url_for('artists'))
+        return redirect(url_for('artists'))
 
     return render_template('pages/show_artist.html', artist=data)
 
@@ -439,7 +440,16 @@ def create_artist_submission():
                 flash(error, form[category].label)
         return redirect(url_for('create_artist_form'))
 
-    artist_props = ['name', 'genres', 'city', 'state', 'phone', 'image_link', 'facebook_link']
+    artist_props = [
+        'name',
+        'genres',
+        'city',
+        'state',
+        'phone',
+        'image_link',
+        'facebook_link',
+        'website'
+    ]
 
     error = False
     try:
@@ -453,9 +463,10 @@ def create_artist_submission():
         print(sys.exc_info())
     finally:
         db.session.close()
+
     if error:
         flash('There was an error saving the artist')
-        redirect(url_for('create_artist_form'))
+        return redirect(url_for('create_artist_form'))
 
     # on successful db insert, flash success
     flash('Artist ' + request.form['name'] + ' was successfully listed!')
@@ -528,14 +539,35 @@ def create_show_submission():
     # called to create new shows in the db, upon submitting new show listing form
     # TODO: insert form data as a new Show record in the db, instead
 
+    form = ShowForm()
+
+    if not form.validate_on_submit():
+        for category, errors in form.errors.items():
+            for error in errors:
+                flash(error, form[category].label)
+        return redirect(url_for('create_shows'))
+
+    show_props = ['artist_id', 'venue_id', 'show_at']
+    error = False
+    try:
+        show_data = {show_prop: form.data[show_prop] for show_prop in show_props}
+        show = Show(**show_data)
+        db.session.add(show)
+        db.session.commit()
+    except:
+        error = True
+        db.session.rollback()
+        print(sys.exc_info())
+    finally:
+        db.session.close()
+
+    if error:
+        flash('There was an error saving the show')
+        return redirect(url_for('create_shows'))
+
     # on successful db insert, flash success
     flash('Show was successfully listed!')
-
-    # TODO: on unsuccessful db insert, flash an error instead.
-    #   e.g., flash('An error occurred. Show could not be listed.')
-    #   see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-    #   return render_template('pages/home.html')
-
+    return redirect(url_for('index'))
 
 
 @app.errorhandler(404)
