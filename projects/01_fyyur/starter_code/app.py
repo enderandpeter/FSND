@@ -64,8 +64,20 @@ class Venue(db.Model):
     website = db.Column(db.String(500))
     genres = db.Column(postgresql.ARRAY(db.String))
     seeking_description = db.Column(db.String(500))
-
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
+    show_props = [
+            'id',
+            'name',
+            'city',
+            'state',
+            'address',
+            'phone',
+            'genres',
+            'seeking_talent',
+            'seeking_description',
+            'website',
+            'image_link',
+            'facebook_link'
+        ]
 
 
 class Artist(db.Model):
@@ -82,10 +94,18 @@ class Artist(db.Model):
     website = db.Column(db.String(500))
     seeking_venue = db.Column(db.Boolean, server_default='0')
     seeking_description = db.Column(db.String(500))
-
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
-
-# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+    show_props = [
+        'id',
+        'name',
+        'genres',
+        'city',
+        'state',
+        'phone',
+        'website',
+        'image_link',
+        'facebook_link',
+        'seeking_description',
+    ]
 
 # ----------------------------------------------------------------------------#
 # Filters.
@@ -117,7 +137,6 @@ def index():
 
 @app.route('/venues')
 def venues():
-    # TODO: num_shows should be aggregated based on number of upcoming shows per venue.
     error = False
     data = []
     try:
@@ -133,8 +152,8 @@ def venues():
                     data.append(row)
 
                 row = {
-                'city': venue.city,
-                'state': venue.state,
+                    'city': venue.city,
+                    'state': venue.state,
                     'venues': []
                 }
 
@@ -177,26 +196,11 @@ def search_venues():
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
     # shows the venue page with the given venue_id
-    # TODO: Handle non-empty show data
     error = False
     data = {}
     try:
         venue = Venue.query.get(venue_id)
-
-        data = {
-            "id": venue.id,
-            "name": venue.name,
-            "genres": venue.genres,
-            "address": venue.address,
-            "city": venue.city,
-            "state": venue.state,
-            "phone": venue.phone,
-            "website": venue.website,
-            "facebook_link": venue.facebook_link,
-            "seeking_talent": venue.seeking_talent,
-            "seeking_description": venue.seeking_description,
-            "image_link": venue.image_link
-        }
+        data = {prop: getattr(venue, prop) for prop in venue.show_props}
 
         if len(venue.shows) == 0:
             data['past_shows'] = []
@@ -255,7 +259,8 @@ def create_venue_submission():
                 flash(error, form[category].label)
         return redirect(url_for('create_venue_form'))
 
-    venue_props = ['name', 'city', 'state', 'address', 'phone', 'genres', 'image_link', 'facebook_link']
+    venue_props = Venue.show_props
+    venue_props.remove('id')
 
     error = False
     try:
@@ -341,19 +346,7 @@ def show_artist(artist_id):
     data = {}
     try:
         artist = Artist.query.get(artist_id)
-
-        data = {
-            "id": artist.id,
-            "name": artist.name,
-            "genres": artist.genres,
-            "city": artist.city,
-            "state": artist.state,
-            "phone": artist.phone,
-            "website": artist.website,
-            "facebook_link": artist.facebook_link,
-            "seeking_description": artist.seeking_description,
-            "image_link": artist.image_link
-        }
+        data = {prop: getattr(artist, prop) for prop in artist.show_props}
 
         if len(artist.shows) == 0:
             data['past_shows'] = []
@@ -425,30 +418,63 @@ def edit_artist_submission(artist_id):
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
-    form = VenueForm()
-    venue = {
-        "id": 1,
-        "name": "The Musical Hop",
-        "genres": ["Jazz", "Reggae", "Swing", "Classical", "Folk"],
-        "address": "1015 Folsom Street",
-        "city": "San Francisco",
-        "state": "CA",
-        "phone": "123-123-1234",
-        "website": "https://www.themusicalhop.com",
-        "facebook_link": "https://www.facebook.com/TheMusicalHop",
-        "seeking_talent": True,
-        "seeking_description": "We are on the lookout for a local artist to play every two weeks. Please call us.",
-        "image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid"
-                      "=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60 "
+    error = False
+    venue_form_data = {}
+    venue = None
+
+    try:
+        venue = Venue.query.get(venue_id)
+        venue_props = venue.show_props[:]
+        venue_props.remove('id')
+
+        venue_form_data = {prop: getattr(venue, prop) for prop in venue_props}
+    except:
+        error = True
+        print(sys.exc_info())
+    finally:
+        db.session.close()
+
+    form = VenueForm(data=venue_form_data)
+
+    venue_page_data = {
+        'id': venue.id,
+        'name': venue.name
     }
-    # TODO: populate form with values from venue with ID <venue_id>
-    return render_template('forms/edit_venue.html', form=form, venue=venue)
+    return render_template('forms/edit_venue.html', form=form, venue=venue_page_data)
 
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
 def edit_venue_submission(venue_id):
-    # TODO: take values from the form submitted, and update existing
-    # venue record with ID <venue_id> using the new attributes
+    form = VenueForm()
+
+    if not form.validate_on_submit():
+        for category, errors in form.errors.items():
+            for error in errors:
+                flash(error, form[category].label)
+        return redirect(url_for('edit_venue'))
+
+    error = False
+    try:
+        venue = Venue.query.get(venue_id)
+        venue_props = venue.show_props[:]
+        venue_props.remove('id')
+        for venue_prop in venue_props:
+            setattr(venue, venue_prop, form.data[venue_prop])
+
+        db.session.commit()
+    except:
+        error = True
+        db.session.rollback()
+        print(sys.exc_info())
+    finally:
+        db.session.close()
+
+    if error:
+        flash('There was an error saving the venue')
+        return redirect(url_for('edit_venue', **{'venue_id': venue_id}))
+
+    # on successful db insert, flash success
+    flash('Venue ' + request.form['name'] + ' was saved!')
     return redirect(url_for('show_venue', venue_id=venue_id))
 
 
@@ -464,8 +490,6 @@ def create_artist_form():
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
     # called upon submitting the new artist listing form
-    # TODO: insert form data as a new Venue record in the db, instead
-    # TODO: modify data to be the data object returned from db insertion
 
     form = ArtistForm()
 
@@ -475,16 +499,9 @@ def create_artist_submission():
                 flash(error, form[category].label)
         return redirect(url_for('create_artist_form'))
 
-    artist_props = [
-        'name',
-        'genres',
-        'city',
-        'state',
-        'phone',
-        'image_link',
-        'facebook_link',
-        'website'
-    ]
+    artist_props = Artist.show_props
+    artist_props.remove('id')
+    artist_props.remove('seeking_description')
 
     error = False
     try:
@@ -505,8 +522,6 @@ def create_artist_submission():
 
     # on successful db insert, flash success
     flash('Artist ' + request.form['name'] + ' was successfully listed!')
-    # TODO: on unsuccessful db insert, flash an error instead.
-    # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
     return render_template('pages/home.html')
 
 
