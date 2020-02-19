@@ -104,6 +104,7 @@ class Artist(db.Model):
         'website',
         'image_link',
         'facebook_link',
+        'seeking_venue',
         'seeking_description',
     ]
 
@@ -372,6 +373,7 @@ def show_artist(artist_id):
             ]
         data['past_shows_count'] = len(data['past_shows'])
         data['upcoming_shows_count'] = len(data['upcoming_shows'])
+        data['edit_url'] = url_for('edit_artist', **{'artist_id': artist_id})
     except:
         error = True
         print(sys.exc_info())
@@ -389,23 +391,28 @@ def show_artist(artist_id):
 #  ----------------------------------------------------------------
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
-    form = ArtistForm()
-    artist = {
-        "id": 4,
-        "name": "Guns N Petals",
-        "genres": ["Rock n Roll"],
-        "city": "San Francisco",
-        "state": "CA",
-        "phone": "326-123-5000",
-        "website": "https://www.gunsnpetalsband.com",
-        "facebook_link": "https://www.facebook.com/GunsNPetals",
-        "seeking_venue": True,
-        "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
-        "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid"
-                      "=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80 "
+    error = False
+    artist_form_data = {}
+    artist = None
+
+    try:
+        artist = Artist.query.get(artist_id)
+        artist_props = artist.show_props[:]
+        artist_props.remove('id')
+
+        artist_form_data = {prop: getattr(artist, prop) for prop in artist_props}
+    except:
+        error = True
+        print(sys.exc_info())
+    finally:
+        db.session.close()
+
+    form = ArtistForm(data=artist_form_data)
+    artist_page_data = {
+        'id': artist.id,
+        'name': artist.name
     }
-    # TODO: populate form with fields from artist with ID <artist_id>
-    return render_template('forms/edit_artist.html', form=form, artist=artist)
+    return render_template('forms/edit_artist.html', form=form, artist=artist_page_data)
 
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
