@@ -4,22 +4,28 @@
 <script>
 $(function(){
     $('#delete-btn').click(function(e){
-        $('#delete-error').text('')
-        const id = $(this).data('id')
+        if(window.confirm('Delete this venue?')){
+            $('#delete-error').text('')
+            const id = $(this).data('id')
 
-        fetch(`/venues/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': "{{ csrf_token() }}"
-            }
-        })
-        .then(function(response){
-            console.log(response)
-        })
-        .catch(function(){
-            $('#delete-error').text('There was an error')
-        })
+            fetch(`/venues/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': "{{ csrf_token() }}"
+                }
+            })
+            .then(function(response){
+                return response.json();
+            })
+            .then(function(jsonResponse){
+                if(jsonResponse.success){
+                    window.location = '/venues';
+                }
+            }).catch(function(){
+                $('#delete-error').text('There was an error')
+            })
+        }
     })
 })
 </script>
