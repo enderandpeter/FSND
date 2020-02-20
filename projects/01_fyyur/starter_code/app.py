@@ -293,7 +293,7 @@ def delete_venue(venue_id):
 
     # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
     # clicking that button delete it from the db then redirect the user to the homepage
-    return None
+    return 'No denyin'
 
 
 #  Artists
@@ -398,7 +398,10 @@ def edit_artist(artist_id):
     try:
         artist = Artist.query.get(artist_id)
         artist_props = artist.show_props[:]
-        artist_props.remove('id')
+        try:
+            artist_props.remove('id')
+        except ValueError:
+            pass
 
         artist_form_data = {prop: getattr(artist, prop) for prop in artist_props}
     except:
@@ -417,8 +420,36 @@ def edit_artist(artist_id):
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
-    # TODO: take values from the form submitted, and update existing
-    # artist record with ID <artist_id> using the new attributes
+    form = ArtistForm()
+
+    if not form.validate_on_submit():
+        for category, errors in form.errors.items():
+            for error in errors:
+                flash(error, form[category].label)
+        return redirect(url_for('edit_artist'))
+
+    error = False
+    try:
+        venue = Artist.query.get(artist_id)
+        venue_props = venue.show_props[:]
+        venue_props.remove('id')
+        for venue_prop in venue_props:
+            setattr(venue, venue_prop, form.data[venue_prop])
+
+        db.session.commit()
+    except:
+        error = True
+        db.session.rollback()
+        print(sys.exc_info())
+    finally:
+        db.session.close()
+
+    if error:
+        flash('There was an error saving the artist')
+        return redirect(url_for('edit_artist', **{'artist_id': artist_id}))
+
+    # on successful db insert, flash success
+    flash('Artist ' + request.form['name'] + ' was saved!')
 
     return redirect(url_for('show_artist', artist_id=artist_id))
 
@@ -508,7 +539,6 @@ def create_artist_submission():
 
     artist_props = Artist.show_props
     artist_props.remove('id')
-    artist_props.remove('seeking_description')
 
     error = False
     try:

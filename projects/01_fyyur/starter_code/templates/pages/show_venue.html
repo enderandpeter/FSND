@@ -1,5 +1,29 @@
 {% extends 'layouts/main.html' %}
 {% block title %}Venue Search{% endblock %}
+{% block page_scripts %}
+<script>
+$(function(){
+    $('#delete-btn').click(function(e){
+        $('#delete-error').text('')
+        const id = $(this).data('id')
+
+        fetch(`/venues/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': "{{ csrf_token() }}"
+            }
+        })
+        .then(function(response){
+            console.log(response)
+        })
+        .catch(function(){
+            $('#delete-error').text('There was an error')
+        })
+    })
+})
+</script>
+{% endblock %}
 {% block content %}
 <div class="row">
 	<div class="col-sm-6">
@@ -75,6 +99,10 @@
 		{% endfor %}
 	</div>
 </section>
+<div class="row">
+    <button id="delete-btn" data-id="{{ venue.id }}">Delete</button>
+    <span class="alert-danger" id="delete-error"></span>
+</div>
 
 {% endblock %}
 
