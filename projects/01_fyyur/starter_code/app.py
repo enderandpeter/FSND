@@ -5,6 +5,7 @@
 import json
 
 from sqlalchemy import text
+from sqlalchemy.orm import backref
 
 import config
 import dateutil.parser
@@ -42,11 +43,11 @@ class Show(db.Model):
     __tablename__ = 'shows'
 
     id = db.Column(db.Integer, primary_key=True)
-    artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'))
-    venue_id = db.Column(db.Integer, db.ForeignKey('venues.id'))
+    artist_id = db.Column(db.Integer, db.ForeignKey('artists.id', onupdate="CASCADE", ondelete="CASCADE"))
+    venue_id = db.Column(db.Integer, db.ForeignKey('venues.id', onupdate="CASCADE", ondelete="CASCADE"))
     show_at = db.Column(db.DateTime(timezone=True), nullable=True)
-    venue = db.relationship("Venue", backref="shows")
-    artist = db.relationship("Artist", backref="shows")
+    venue = db.relationship("Venue", backref=backref('shows', cascade="all, delete-orphan", single_parent=True) )
+    artist = db.relationship("Artist", backref=backref('shows', cascade="all, delete-orphan", single_parent=True))
 
 
 class Venue(db.Model):
@@ -163,7 +164,8 @@ def venues():
                 'name': venue.name
             })
 
-        data.append(row)
+        if len(row['venues']):
+            data.append(row)
     except:
         error = True
         print(sys.exc_info())
@@ -173,23 +175,39 @@ def venues():
     if error:
         flash('There was an error retrieving the venues')
         return redirect(url_for('create_venue_form'))
-
+    print(data)
     return render_template('pages/venues.html', areas=data)
 
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
-    # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
-    # seach for Hop should return "The Musical Hop".
-    # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
+    error = False
+    search_term=request.form.get('search_term', '')
     response = {
-        "count": 1,
-        "data": [{
-            "id": 2,
-            "name": "The Dueling Pianos Bar",
-            "num_upcoming_shows": 0,
-        }]
+        "count": 0,
+        "data": []
     }
+
+    try:
+        venues = Venue.query.filter(Venue.name.ilike(f'%{search_term}%')).all()
+        response = {
+            "count": len(venues),
+            "data": [{
+                "id": venue.id,
+                "name": venue.name,
+                "num_upcoming_shows": len([show for show in venue.shows if show.show_at >= datetime.now(timezone.utc)])
+            } for venue in venues]
+        }
+    except:
+        error = True
+        print(sys.exc_info())
+    finally:
+        db.session.close()
+
+    if error:
+        flash('There was an error while searching')
+        return redirect(url_for('index'))
+
     return render_template('pages/search_venues.html', results=response,
                            search_term=request.form.get('search_term', ''))
 
@@ -261,7 +279,10 @@ def create_venue_submission():
         return redirect(url_for('create_venue_form'))
 
     venue_props = Venue.show_props
-    venue_props.remove('id')
+    try:
+        venue_props.remove('id')
+    except ValueError:
+        pass
 
     error = False
     try:
@@ -288,8 +309,6 @@ def create_venue_submission():
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
-    # TODO: Complete this endpoint for taking a venue_id, and using
-    # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
     error = False
     venue_name = ''
     try:
@@ -339,17 +358,33 @@ def artists():
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
-    # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
-    # search for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
-    # search for "band" should return "The Wild Sax Band".
+    error = False
+    search_term = request.form.get('search_term', '')
     response = {
-        "count": 1,
-        "data": [{
-            "id": 4,
-            "name": "Guns N Petals",
-            "num_upcoming_shows": 0,
-        }]
+        "count": 0,
+        "data": []
     }
+
+    try:
+        artists = Artist.query.filter(Artist.name.ilike(f'%{search_term}%')).all()
+        response = {
+            "count": len(artists),
+            "data": [{
+                "id": artist.id,
+                "name": artist.name,
+                "num_upcoming_shows": len([show for show in artist.shows if show.show_at >= datetime.now(timezone.utc)])
+            } for artist in artists]
+        }
+    except:
+        error = True
+        print(sys.exc_info())
+    finally:
+        db.session.close()
+
+    if error:
+        flash('There was an error while searching')
+        return redirect(url_for('index'))
+
     return render_template('pages/search_artists.html', results=response,
                            search_term=request.form.get('search_term', ''))
 
@@ -447,7 +482,10 @@ def edit_artist_submission(artist_id):
     try:
         venue = Artist.query.get(artist_id)
         venue_props = venue.show_props[:]
-        venue_props.remove('id')
+        try:
+            venue_props.remove('id')
+        except ValueError:
+            pass
         for venue_prop in venue_props:
             setattr(venue, venue_prop, form.data[venue_prop])
 
@@ -478,7 +516,10 @@ def edit_venue(venue_id):
     try:
         venue = Venue.query.get(venue_id)
         venue_props = venue.show_props[:]
-        venue_props.remove('id')
+        try:
+            venue_props.remove('id')
+        except ValueError:
+            pass
 
         venue_form_data = {prop: getattr(venue, prop) for prop in venue_props}
     except:
@@ -510,7 +551,10 @@ def edit_venue_submission(venue_id):
     try:
         venue = Venue.query.get(venue_id)
         venue_props = venue.show_props[:]
-        venue_props.remove('id')
+        try:
+            venue_props.remove('id')
+        except ValueError:
+            pass
         for venue_prop in venue_props:
             setattr(venue, venue_prop, form.data[venue_prop])
 
@@ -553,7 +597,10 @@ def create_artist_submission():
         return redirect(url_for('create_artist_form'))
 
     artist_props = Artist.show_props
-    artist_props.remove('id')
+    try:
+        artist_props.remove('id')
+    except ValueError:
+        pass
 
     error = False
     try:
@@ -641,6 +688,47 @@ def create_show_submission():
     flash('Show was successfully listed!')
     return redirect(url_for('index'))
 
+@app.route('/shows/search', methods=['POST'])
+def search_shows():
+    error = False
+    search_term=request.form.get('search_term', '')
+    response = {
+        "count": 0,
+        "data": []
+    }
+
+    try:
+        shows = Show.query.filter(
+            Artist.id == Show.artist_id, Venue.id == Show.venue_id,
+            Venue.name.ilike(f'%{search_term}%') | Artist.name.ilike(f'%{search_term}%')
+        ).all()
+        response = {
+            "count": len(shows),
+            "data": [{
+                "id": show.id,
+                "venue": {
+                    "id": show.venue.id,
+                    "name": show.venue.name
+                },
+                "artist": {
+                    "id": show.artist.id,
+                    "name": show.artist.name
+                },
+                "show_at": show.show_at.isoformat()
+            } for show in shows]
+        }
+    except:
+        error = True
+        print(sys.exc_info())
+    finally:
+        db.session.close()
+
+    if error:
+        flash('There was an error while searching')
+        return redirect(url_for('index'))
+
+    return render_template('pages/search_shows.html', results=response,
+                           search_term=search_term)
 
 @app.errorhandler(404)
 def not_found_error(error):

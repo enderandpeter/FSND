@@ -9,4 +9,4 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 DEBUG = True
 
 # Connect to the database
-SQLALCHEMY_DATABASE_URI = '<Put your local database url>'
+SQLALCHEMY_DATABASE_URI = 'Your local database url, for example: postgres://postgres:postgres@localhost/fyyur'

@@ -1,0 +1,34 @@
+{% extends 'layouts/main.html' %}
+{% block title %}Show Search{% endblock %}
+{% block content %}
+<p class="lead"> Show Search </p>
+<h3>Number of search results for "{{ search_term }}": {{ results.count }}</h3>
+<div class="col-sm-4">
+    {% for show in results.data %}
+    <div class="tile tile-show">
+        <div>
+            <a href="/venues/{{ show.venue.id }}">
+                <i class="fas fa-music"></i>
+                <div class="item">
+                    <h5>{{ show.venue.name }}</h5>
+                </div>
+            </a>
+        </div>
+        featuring
+        <div>
+            <a href="/artists/{{ show.artist.id }}">
+                <i class="fas fa-music"></i>
+                <div class="item">
+                    <h5>{{ show.artist.name }}</h5>
+                </div>
+            </a>
+         </div>
+        on
+        <strong>{{ show.show_at|datetime('full') }}</strong>
+    </div>
+    {% endfor %}
+</div>
+
+{#    Todo implement show search frontend #}
+
+{% endblock %}

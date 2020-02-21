@@ -7,13 +7,15 @@ Unzip somewhere on your filesystem, or [download from Github](https://github.com
 
 Tested with Python 3.7
 
+A Postgres DB is required for the ARRAY column type
+
 Install the required packages, such as with `pip3 install -r requirements.txt` as noted below.
 
 ## Deployment
 
-1. Copy `config.py.example` to `config.py` if it does not yet exist. You may set Flask config variables here if you wish.
+1. Copy `config.py.example` to `config.py` if it does not yet exist. You may set other Flask config variables here if you wish.
 1. Create the database you will use for this project
-and set `SQLALCHEMY_DATABASE_URI` in `config.py` to a DB URI.
+and make sure `SQLALCHEMY_DATABASE_URI` in `config.py` is set to a valid DB URI.
 1. Set the environment variables:
 
    * `FLASK_APP=app.py`
