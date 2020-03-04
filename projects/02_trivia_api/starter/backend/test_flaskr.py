@@ -2,6 +2,7 @@ import os
 import unittest
 import json
 from flask_sqlalchemy import SQLAlchemy
+from flask import json
 from sqlalchemy import create_engine, text
 
 from flaskr import create_app
@@ -31,15 +32,27 @@ class TriviaTestCase(unittest.TestCase):
             engine = create_engine(self.database_path)
             escaped_sql = text(f.read())
             engine.execute(escaped_sql)
-    
+
+    def dropTables(self):
+        connection = create_engine(self.database_path)
+        connection.execute('drop table if exists categories')
+        connection.execute('drop table if exists questions')
+
     def tearDown(self):
-        """Executed after reach test"""
-        self.db.drop_all()
+        self.dropTables()
 
     """
     TODO
     Write at least one test for each test for successful operation and for expected errors.
     """
+    def test_get_categories(self):
+        """Categories can be retrieved """
+        res = self.client().get('/categories')
+        self.assertEqual(res.status_code, 200)
+        data = json.loads(res.data)
+        self.assertEqual(data[0]['id'], 1)
+        self.assertEqual(data[0]['type'], "Science")
+        self.assertEqual(len(data), 6)
 
 
 # Make the tests conveniently executable
