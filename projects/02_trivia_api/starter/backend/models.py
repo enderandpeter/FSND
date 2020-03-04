@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import Column, String, Integer, create_engine
+from sqlalchemy import Column, String, Integer, ForeignKey, create_engine
 from flask_sqlalchemy import SQLAlchemy
 import json
 
@@ -34,7 +34,11 @@ class Question(db.Model):
     id = Column(Integer, primary_key=True)
     question = Column(String)
     answer = Column(String)
-    category = Column(String)
+    category_id = Column(
+        Integer,
+        ForeignKey('categories.id', onupdate="CASCADE", ondelete="CASCADE"),
+        nullable=False
+    )
     difficulty = Column(Integer)
 
     def __init__(self, question, answer, category, difficulty):
@@ -59,7 +63,7 @@ class Question(db.Model):
             'id': self.id,
             'question': self.question,
             'answer': self.answer,
-            'category': self.category,
+            'category': self.category.format(),
             'difficulty': self.difficulty
         }
 
@@ -74,6 +78,7 @@ class Category(db.Model):
 
     id = Column(Integer, primary_key=True)
     type = Column(String)
+    questions = db.relationship('Question', backref='category', cascade="all, delete-orphan")
 
     def __init__(self, type):
         self.type = type

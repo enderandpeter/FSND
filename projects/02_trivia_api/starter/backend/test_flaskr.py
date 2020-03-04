@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask import json
 from sqlalchemy import create_engine, text
 
-from flaskr import create_app
+from flaskr import create_app, QUESTIONS_PER_PAGE
 from models import setup_db, Question, Category
 
 
@@ -35,8 +35,8 @@ class TriviaTestCase(unittest.TestCase):
 
     def dropTables(self):
         connection = create_engine(self.database_path)
-        connection.execute('drop table if exists categories')
         connection.execute('drop table if exists questions')
+        connection.execute('drop table if exists categories')
 
     def tearDown(self):
         self.dropTables()
@@ -53,6 +53,16 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data[0]['id'], 1)
         self.assertEqual(data[0]['type'], "Science")
         self.assertEqual(len(data), 6)
+
+
+    def test_get_questions(self):
+        """Questions can be retrieved """
+        res = self.client().get('/questions')
+        self.assertEqual(res.status_code, 200)
+        data = json.loads(res.data)
+        self.assertEqual(data['questions'][0]['id'], 2)
+        self.assertEqual(data['questions'][0]['answer'], "Apollo 13")
+        self.assertEqual(len(data['questions']), QUESTIONS_PER_PAGE)
 
 
 # Make the tests conveniently executable
