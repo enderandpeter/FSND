@@ -12,7 +12,7 @@ class QuestionView extends Component {
       questions: [],
       page: 1,
       totalQuestions: 0,
-      categories: {},
+      categories: [],
       currentCategory: null,
     }
   }
@@ -125,27 +125,35 @@ class QuestionView extends Component {
         <div className="categories-list">
           <h2 onClick={() => {this.getQuestions()}}>Categories</h2>
           <ul>
-            {Object.keys(this.state.categories).map((id, ) => (
-              <li key={id} onClick={() => {this.getByCategory(id)}}>
-                {this.state.categories[id]}
-                <img className="category" src={`${this.state.categories[id]}.svg`}/>
-              </li>
-            ))}
+            {this.state.categories.map((category) => {
+              const { id, type } = category;
+              return (
+                <li key={id} onClick={() => {
+                  this.getByCategory(id)
+                }}>
+                  {type}
+                  <img className="category" src={`${type}.svg`} alt=''/>
+                </li>
+              )})}
           </ul>
           <Search submitSearch={this.submitSearch}/>
         </div>
         <div className="questions-list">
           <h2>Questions</h2>
-          {this.state.questions.map((q, ind) => (
-            <Question
-              key={q.id}
-              question={q.question}
-              answer={q.answer}
-              category={this.state.categories[q.category]} 
-              difficulty={q.difficulty}
-              questionAction={this.questionAction(q.id)}
-            />
-          ))}
+          {this.state.questions.map((q, ind) => {
+            const { id, question, answer, difficulty } = q;
+            const category = this.state.categories.find((category) => q.category.id === category.id);
+            const categoryType = category.type;
+            return (
+              <Question
+                  key={id}
+                  question={question}
+                  answer={answer}
+                  category={categoryType}
+                  difficulty={difficulty}
+                  questionAction={this.questionAction(id)}
+              />
+          )})}
           <div className="pagination-menu">
             {this.createPagination()}
           </div>

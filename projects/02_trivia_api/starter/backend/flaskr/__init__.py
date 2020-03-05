@@ -58,21 +58,24 @@ def create_app(test_config=None):
 
         try:
           questions = Question.query.order_by('id').all()
+          categories = Category.query.order_by('id').all()
         except Exception:
           error = True
 
         if error:
-          abort(400)
+            abort(400)
 
         formatted_questions = [question.format() for question in questions]
         displayed_questions = formatted_questions[start:end]
 
         if len(displayed_questions) == 0:
-          abort(404)
+            abort(404)
 
         return jsonify({
-          'total_questions': len(formatted_questions),
-          'questions': formatted_questions[start:end]
+            'total_questions': len(formatted_questions),
+            'questions': formatted_questions[start:end],
+            'categories': [category.format() for category in categories],
+            'current_category': None
         })
 
     '''
