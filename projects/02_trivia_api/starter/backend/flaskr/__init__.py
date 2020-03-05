@@ -36,18 +36,6 @@ def create_app(test_config=None):
 
         return jsonify([category.format() for category in categories])
 
-    '''
-    @TODO: 
-    Create an endpoint to handle GET requests for questions, 
-    including pagination (every 10 questions). 
-    This endpoint should return a list of questions, 
-    number of total questions, current category, categories.
-  
-    TEST: At this point, when you start the application
-    you should see questions and categories generated,
-    ten questions per page and pagination at the bottom of the screen for three pages.
-    Clicking on the page numbers should update the questions. 
-    '''
     @app.route('/questions')
     def get_questions():
         page = request.args.get('page', 1, type=int)
@@ -68,12 +56,9 @@ def create_app(test_config=None):
         formatted_questions = [question.format() for question in questions]
         displayed_questions = formatted_questions[start:end]
 
-        if len(displayed_questions) == 0:
-            abort(404)
-
         return jsonify({
             'total_questions': len(formatted_questions),
-            'questions': formatted_questions[start:end],
+            'questions': displayed_questions,
             'categories': [category.format() for category in categories],
             'current_category': None
         })
@@ -85,6 +70,21 @@ def create_app(test_config=None):
     TEST: When you click the trash icon next to a question, the question will be removed.
     This removal will persist in the database and when you refresh the page. 
     '''
+    @app.route('/questions/<int:id>', methods=['DELETE'])
+    def delete_question(id):
+        error = False
+
+        try:
+            question = Question.query.get(id)
+            if question:
+                question.delete()
+        except Exception:
+            error = True
+
+        if error:
+            abort(400)
+
+        return jsonify({'success': True})
 
     '''
     @TODO: 

@@ -4,9 +4,10 @@ import json
 from flask_sqlalchemy import SQLAlchemy
 from flask import json
 from sqlalchemy import create_engine, text
+from sqlalchemy.sql.expression import func
 
 from flaskr import create_app, QUESTIONS_PER_PAGE
-from models import setup_db, Question, Category
+from models import setup_db, Question, Category, db
 
 
 class TriviaTestCase(unittest.TestCase):
@@ -64,6 +65,15 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['questions'][0]['answer'], "Apollo 13")
         self.assertEqual(len(data['questions']), QUESTIONS_PER_PAGE)
 
+
+    def test_delete_question(self):
+        """A question can be deleted"""
+        question = Question.query.order_by(func.random()).first()
+        id = question.id
+        res = self.client().delete(f'/questions/{id}')
+        self.assertEqual(res.status_code, 200)
+        #deleted_question = Question.query.get(id)
+        # self.assertIsNone(deleted_question)
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
