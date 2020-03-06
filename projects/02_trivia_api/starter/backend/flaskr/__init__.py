@@ -1,10 +1,12 @@
 import os
+import sys
+
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
 
-from models import setup_db, Question, Category
+from models import setup_db, Question, Category, db
 
 QUESTIONS_PER_PAGE = 10
 
@@ -96,6 +98,37 @@ def create_app(test_config=None):
     the form will clear and the question will appear at the end of the last page
     of the questions list in the "List" tab.  
     '''
+    @app.route('/questions', methods=['POST'])
+    def create_question():
+        error = False
+
+        questionProps = [
+            'question',
+            'answer',
+            'difficulty',
+            'category'
+        ]
+
+        questionData = {
+            questionProp: request.get_json()[questionProp]
+            for questionProp in questionProps
+        }
+
+        questionData['category'] = Category.query.get(questionData['category'])
+        try:
+            question = Question(**questionData)
+            question.insert()
+        except Exception:
+            error = True
+            db.session.rollback()
+            print(sys.exc_info())
+        finally:
+            db.session.close()
+
+        if error:
+            abort(400)
+
+        return jsonify({'success': True})
 
     '''
     @TODO: 
