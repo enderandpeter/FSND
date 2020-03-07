@@ -1,3 +1,33 @@
+# My Triva API
+
+## Requirements
+
+* Python 3.7
+* Postgres 12.1
+
+## Installation
+
+1. Clone this repo
+
+### Backend
+1. Go to the `backend` folder
+2. Run `pip install -r requirements.txt`
+3. Set the following environment variables:
+   * `FLASK_APP=flaskr`
+4. Copy `config.py.example` to `config.py` and set the DB URI for the main and test DBs
+5. Run `flask run`. The tables will be created
+6. Run a command like `psql -d [dbname] -f trivia_data.psql` to seed the DB
+7. Make a request to `/questions` on the backend server to confirm it is ready
+
+### Frontend
+1. Go to the `frontend` folder
+2. Copy `config.js.example` to `config.js` and make sure it has the right backend server host set
+2. Run `npm install`
+3. Run `npm run start`
+
+### Tests
+1. Run `python -m unittest test_flaskr.py`
+
 # Full Stack Trivia API  Frontend
 
 ## Getting Setup

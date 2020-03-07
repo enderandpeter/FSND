@@ -69,11 +69,11 @@ class FormView extends Component {
         <form className="form-view" id="add-question-form" onSubmit={this.submitQuestion}>
           <label>
             Question
-            <input type="text" name="question" required onChange={this.handleChange}/>
+            <input type="text" name="question" required maxLength={300} onChange={this.handleChange}/>
           </label>
           <label>
             Answer
-            <input type="text" name="answer" required onChange={this.handleChange}/>
+            <input type="text" name="answer" maxLength={300} required onChange={this.handleChange}/>
           </label>
           <label>
             Difficulty

@@ -5,7 +5,7 @@ from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
-from werkzeug.exceptions import BadRequest
+from werkzeug.exceptions import BadRequest, NotFound, UnprocessableEntity
 
 from models import setup_db, Question, Category, db
 from sqlalchemy import func
@@ -31,7 +31,7 @@ def create_app(test_config=None):
         error = False
 
         try:
-            categories = Category.query.order_by('id').all();
+            categories = Category.query.order_by('id').all()
         except Exception:
             error = True
             db.session.rollback()
@@ -107,8 +107,17 @@ def create_app(test_config=None):
             for questionProp in questionProps
         }
 
-        questionData['category'] = Category.query.get(questionData['category'])
+        for prop in questionProps:
+            value = questionData[prop].strip()
+            valueLength = len(value)
+            if valueLength == 0 or valueLength > 300:
+                abort(422)
+
+            if prop == 'difficulty' and (int(value) < 1 or int(value) > 5):
+                abort(422)
+
         try:
+            questionData['category'] = Category.query.get(questionData['category'])
             question = Question(**questionData)
             question.insert()
         except Exception:
@@ -126,11 +135,15 @@ def create_app(test_config=None):
     def search_questions():
         error = False
 
-        search_term = request.get_json()['searchTerm']
-
         try:
+            search_term = request.get_json()['searchTerm'].strip()
+            search_term_length = len(search_term)
+            if len(search_term.strip()) == 0:
+                abort(422)
             questions = Question.query.filter(Question.question.ilike(f'%{search_term}%')).all()
-        except:
+        except ValueError:
+            abort(422)
+        except Exception:
             error = True
             db.session.rollback()
             print(sys.exc_info())
@@ -161,6 +174,9 @@ def create_app(test_config=None):
             abort(400)
 
         formatted_questions = [question.format() for question in questions]
+
+        if len(formatted_questions) == 0:
+            abort(404)
 
         return jsonify({
             'total_questions': len(formatted_questions),
@@ -194,7 +210,8 @@ def create_app(test_config=None):
                 question_query = question_query.filter(Question.category_id == quiz_category['id'])
 
             question = question_query.order_by(func.random()).first()
-
+        except ValueError:
+            abort(422)
         except Exception:
             error = True
             db.session.rollback()
@@ -207,16 +224,25 @@ def create_app(test_config=None):
             'question': question.format() if hasattr(question, 'format') else question
         })
 
-    '''
-    @TODO: 
-    Create error handlers for all expected errors 
-    including 404 and 422. 
-    '''
     @app.errorhandler(BadRequest)
     def handle_bad_request(e):
         return jsonify({
             "code": e.code,
             "message": "There was something wrong with the request"
+        }), e.code
+
+    @app.errorhandler(UnprocessableEntity)
+    def handle_bad_request(e):
+        return jsonify({
+            "code": e.code,
+            "message": "The data provided is not valid"
+        }), e.code
+
+    @app.errorhandler(NotFound)
+    def handle_bad_request(e):
+        return jsonify({
+            "code": e.code,
+            "message": "Requested resource not found"
         }), e.code
 
     return app
