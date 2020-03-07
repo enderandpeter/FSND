@@ -61,8 +61,8 @@ class TriviaTestCase(unittest.TestCase):
         res = self.client().get('/questions')
         self.assertEqual(res.status_code, 200)
         data = json.loads(res.data)
-        self.assertEqual(data['questions'][0]['id'], 2)
-        self.assertEqual(data['questions'][0]['answer'], "Apollo 13")
+        self.assertEqual(data['questions'][0]['id'], 1)
+        self.assertEqual(data['questions'][0]['answer'], "Maya Angelou")
         self.assertEqual(len(data['questions']), QUESTIONS_PER_PAGE)
 
 
@@ -72,8 +72,30 @@ class TriviaTestCase(unittest.TestCase):
         id = question.id
         res = self.client().delete(f'/questions/{id}')
         self.assertEqual(res.status_code, 200)
-        #deleted_question = Question.query.get(id)
+        # The follow line causes the terminal to hang and not respond to key interrupts
+        # deleted_question = Question.query.get(id)
         # self.assertIsNone(deleted_question)
+
+    def test_search_questions(self):
+        """Questions can be searched"""
+        search_term = 'What'
+        res = self.client().post('/questions/search', json={'searchTerm': search_term})
+        self.assertEqual(res.status_code, 200)
+        data = json.loads(res.data)
+        self.assertEqual(data['total_questions'], 8)
+
+    def test_get_questions_by_cat(self):
+        """Questions can be retrieved by category"""
+        category_id = 3
+        res = self.client().get(f'/categories/{category_id}/questions')
+        self.assertEqual(res.status_code, 200)
+        data = json.loads(res.data)
+        for question in data['questions']:
+            self.assertEqual(question['category']['id'], 3)
+
+    def test_quizzes(self):
+        """Quizzes work as expected"""
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
