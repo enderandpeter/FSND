@@ -16,7 +16,7 @@ INSERT INTO public.questions (question, answer, category_id, difficulty) VALUES 
 INSERT INTO public.questions (question, answer, category_id, difficulty) VALUES ('What is the largest lake in Africa?', 'Lake Victoria', '3', 2);
 INSERT INTO public.questions (question, answer, category_id, difficulty) VALUES ('In which royal palace would you find the Hall of Mirrors?', 'The Palace of Versailles', '3', 3);
 INSERT INTO public.questions (question, answer, category_id, difficulty) VALUES ('The Taj Mahal is located in which Indian city?', 'Agra', '3', 2);
-INSERT INTO public.questions (question, answer, category_id, difficulty) VALUES ('Which Dutch graphic artistâ€“initials M C was a creator of optical illusions?', 'Escher', '2', 1);
+INSERT INTO public.questions (question, answer, category_id, difficulty) VALUES ('Which Dutch graphic artist had initials M C and was a creator of optical illusions?', 'Escher', '2', 1);
 INSERT INTO public.questions (question, answer, category_id, difficulty) VALUES ('La Giaconda is better known as what?', 'Mona Lisa', '2', 3);
 INSERT INTO public.questions (question, answer, category_id, difficulty) VALUES ('How many paintings did Van Gogh sell in his lifetime?', 'One', '2', 4);
 INSERT INTO public.questions (question, answer, category_id, difficulty) VALUES ('Which American artist was a pioneer of Abstract Expressionism, and a leading exponent of action painting?', 'Jackson Pollock', '2', 2);

@@ -28,16 +28,10 @@ def create_app(test_config=None):
 
     @app.route('/categories')
     def get_categories():
-        error = False
-
         try:
             categories = Category.query.order_by('id').all()
         except Exception:
-            error = True
-            db.session.rollback()
             print(sys.exc_info())
-
-        if error:
             abort(400)
 
         return jsonify([category.format() for category in categories])
@@ -48,17 +42,11 @@ def create_app(test_config=None):
         start = (page - 1) * QUESTIONS_PER_PAGE
         end = start + QUESTIONS_PER_PAGE
 
-        error = False
-
         try:
           questions = Question.query.order_by('id').all()
           categories = Category.query.order_by('id').all()
         except Exception:
-            error = True
-            db.session.rollback()
             print(sys.exc_info())
-
-        if error:
             abort(400)
 
         formatted_questions = [question.format() for question in questions]
@@ -74,18 +62,17 @@ def create_app(test_config=None):
 
     @app.route('/questions/<int:id>', methods=['DELETE'])
     def delete_question(id):
-        error = False
-
         try:
             question = Question.query.get(id)
             if question:
                 question.delete()
+            else:
+                raise NotFound
+        except NotFound:
+            abort(404)
         except Exception:
-            error = True
             db.session.rollback()
             print(sys.exc_info())
-
-        if error:
             abort(400)
 
         return jsonify({'success': True})
@@ -122,11 +109,8 @@ def create_app(test_config=None):
             question = Question(**questionData)
             question.insert()
         except Exception:
-            error = True
             db.session.rollback()
             print(sys.exc_info())
-
-        if error:
             abort(400)
 
         return jsonify({'success': True})
@@ -134,10 +118,8 @@ def create_app(test_config=None):
 
     @app.route('/questions/search', methods=['POST'])
     def search_questions():
-        error = False
-
         try:
-            search_term = request.get_json()['searchTerm'].strip()
+            search_term = request.get_json()['search_term'].strip()
             search_term_length = len(search_term)
             if len(search_term.strip()) == 0:
                 raise UnprocessableEntity
@@ -145,11 +127,7 @@ def create_app(test_config=None):
         except (ValueError, UnprocessableEntity):
             abort(422)
         except Exception:
-            error = True
-            db.session.rollback()
             print(sys.exc_info())
-
-        if error:
             abort(400)
 
         formatted_questions = [question.format() for question in questions]
@@ -162,16 +140,10 @@ def create_app(test_config=None):
 
     @app.route('/categories/<int:id>/questions')
     def get_questions_by_category(id):
-        error = False
-
         try:
             questions = Question.query.filter(Question.category_id == id).order_by('id').all()
         except Exception:
-            error = True
             db.session.rollback()
-            print(sys.exc_info())
-
-        if error:
             abort(400)
 
         formatted_questions = [question.format() for question in questions]
@@ -187,8 +159,6 @@ def create_app(test_config=None):
 
     @app.route('/quizzes', methods=['POST'])
     def manage_quizzes():
-        error = False
-
         try:
             previous_questions = request.get_json()['previous_questions']
             quiz_category = request.get_json()['quiz_category']
@@ -203,11 +173,7 @@ def create_app(test_config=None):
         except ValueError:
             abort(422)
         except Exception:
-            error = True
-            db.session.rollback()
             print(sys.exc_info())
-
-        if error:
             abort(400)
 
         return jsonify({

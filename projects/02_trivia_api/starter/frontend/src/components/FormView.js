@@ -43,8 +43,8 @@ class FormView extends Component {
       data: JSON.stringify({
         question: this.state.question,
         answer: this.state.answer,
-        difficulty: this.state.difficulty,
-        category: this.state.category
+        difficulty: +this.state.difficulty,
+        category: +this.state.category
       }),
       crossDomain: true,
       success: (result) => {

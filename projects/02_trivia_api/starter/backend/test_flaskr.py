@@ -79,7 +79,7 @@ class TriviaTestCase(unittest.TestCase):
     def test_search_questions(self):
         """Questions can be searched"""
         search_term = 'What'
-        res = self.client().post('/questions/search', json={'searchTerm': search_term})
+        res = self.client().post('/questions/search', json={'search_term': search_term})
         self.assertEqual(res.status_code, 200)
         data = json.loads(res.data)
         self.assertEqual(data['total_questions'], 8)
