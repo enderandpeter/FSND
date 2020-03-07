@@ -108,8 +108,9 @@ def create_app(test_config=None):
         }
 
         for prop in questionProps:
-            value = questionData[prop].strip()
-            valueLength = len(value)
+            value = questionData[prop].strip() if hasattr(questionData[prop], 'strip') else questionData[prop]
+            valueLength = len(value) if hasattr(value, 'strip') else value
+
             if valueLength == 0 or valueLength > 300:
                 abort(422)
 
@@ -139,9 +140,9 @@ def create_app(test_config=None):
             search_term = request.get_json()['searchTerm'].strip()
             search_term_length = len(search_term)
             if len(search_term.strip()) == 0:
-                abort(422)
+                raise UnprocessableEntity
             questions = Question.query.filter(Question.question.ilike(f'%{search_term}%')).all()
-        except ValueError:
+        except (ValueError, UnprocessableEntity):
             abort(422)
         except Exception:
             error = True
@@ -184,17 +185,6 @@ def create_app(test_config=None):
             'current_category': id
         })
 
-    '''
-    @TODO: 
-    Create a POST endpoint to get questions to play the quiz. 
-    This endpoint should take category and previous question parameters 
-    and return a random questions within the given category, 
-    if provided, and that is not one of the previous questions. 
-  
-    TEST: In the "Play" tab, after a user selects "All" or a category,
-    one question at a time is displayed, the user is allowed to answer
-    and shown whether they were correct or not. 
-    '''
     @app.route('/quizzes', methods=['POST'])
     def manage_quizzes():
         error = False
