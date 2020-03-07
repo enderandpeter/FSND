@@ -16,7 +16,7 @@
    * `FLASK_APP=flaskr`
 4. Copy `config.py.example` to `config.py` and set the DB URI for the main and test DBs
 5. Run `flask run`. The tables will be created
-6. Run a command like `psql -d [dbname] -f trivia_data.psql` to seed the DB
+6. Run a command like `psql trivia < trivia_data.psql` or `psql -d [dbname] -f trivia_data.psql` to seed the DB
 7. Make a request to `/questions` on the backend server to confirm it is ready
 
 ### Frontend
