@@ -1,3 +1,9 @@
+# My Stack API Final Project
+
+This is my submission for this project. Only code under this folder has been changed for this submission branch. Please see `backend/README.md` for the API Documentation. Thank you.
+
+# Original Readme
+
 # Full Stack API Final Project
 
 ## Full Stack Trivia

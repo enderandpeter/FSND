@@ -82,31 +82,31 @@ def create_app(test_config=None):
     def create_question():
         error = False
 
-        questionProps = [
+        question_props = [
             'question',
             'answer',
             'difficulty',
             'category'
         ]
 
-        questionData = {
+        question_data = {
             questionProp: request.get_json()[questionProp]
-            for questionProp in questionProps
+            for questionProp in question_props
         }
 
-        for prop in questionProps:
-            value = questionData[prop].strip() if hasattr(questionData[prop], 'strip') else questionData[prop]
-            valueLength = len(value) if hasattr(value, 'strip') else value
+        for prop in question_props:
+            value = question_data[prop].strip() if hasattr(question_data[prop], 'strip') else question_data[prop]
+            value_length = len(value) if hasattr(value, 'strip') else value
 
-            if valueLength == 0 or valueLength > 300:
+            if value_length == 0 or value_length > 300:
                 abort(422)
 
             if prop == 'difficulty' and (int(value) < 1 or int(value) > 5):
                 abort(422)
 
         try:
-            questionData['category'] = Category.query.get(questionData['category'])
-            question = Question(**questionData)
+            question_data['category'] = Category.query.get(question_data['category'])
+            question = Question(**question_data)
             question.insert()
         except Exception:
             db.session.rollback()
