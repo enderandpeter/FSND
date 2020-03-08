@@ -43,8 +43,8 @@ def create_app(test_config=None):
         end = start + QUESTIONS_PER_PAGE
 
         try:
-          questions = Question.query.order_by('id').all()
-          categories = Category.query.order_by('id').all()
+            questions = Question.query.order_by('id').all()
+            categories = Category.query.order_by('id').all()
         except Exception:
             print(sys.exc_info())
             abort(400)
@@ -58,7 +58,6 @@ def create_app(test_config=None):
             'categories': [category.format() for category in categories],
             'current_category': None
         })
-
 
     @app.route('/questions/<int:id>', methods=['DELETE'])
     def delete_question(id):
@@ -77,11 +76,8 @@ def create_app(test_config=None):
 
         return jsonify({'success': True})
 
-
     @app.route('/questions', methods=['POST'])
     def create_question():
-        error = False
-
         question_props = [
             'question',
             'answer',
@@ -115,13 +111,12 @@ def create_app(test_config=None):
 
         return jsonify({'success': True})
 
-
     @app.route('/questions/search', methods=['POST'])
     def search_questions():
         try:
             search_term = request.get_json()['search_term'].strip()
             search_term_length = len(search_term)
-            if len(search_term.strip()) == 0:
+            if search_term_length == 0:
                 raise UnprocessableEntity
             questions = Question.query.filter(Question.question.ilike(f'%{search_term}%')).all()
         except (KeyError, UnprocessableEntity):
@@ -163,7 +158,7 @@ def create_app(test_config=None):
             previous_questions = request.get_json()['previous_questions']
             quiz_category = request.get_json()['quiz_category']
 
-            question_query = Question.query\
+            question_query = Question.query \
                 .filter(~Question.id.in_(previous_questions))
 
             if quiz_category['id']:

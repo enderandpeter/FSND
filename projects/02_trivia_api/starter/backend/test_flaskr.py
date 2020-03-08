@@ -46,6 +46,7 @@ class TriviaTestCase(unittest.TestCase):
     TODO
     Write at least one test for each test for successful operation and for expected errors.
     """
+
     def test_get_categories(self):
         """Categories can be retrieved """
         res = self.client().get('/categories')
@@ -58,7 +59,6 @@ class TriviaTestCase(unittest.TestCase):
         self.dropTables()
         res = self.client().get('/categories')
         self.assertEqual(res.status_code, 400)
-
 
     def test_get_questions(self):
         """Questions can be retrieved """
@@ -125,7 +125,6 @@ class TriviaTestCase(unittest.TestCase):
             category_question_ids = [question.id for question in category_questions]
 
             previous_questions = []
-            last_question_id = 0
             for question_id in category_question_ids:
                 res = self.client().post('/quizzes', json={
                     "previous_questions": previous_questions,
@@ -165,6 +164,7 @@ class TriviaTestCase(unittest.TestCase):
             }
         })
         self.assertEqual(res.status_code, 400)
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

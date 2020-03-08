@@ -11,7 +11,8 @@ setup_db(app)
 
 def setup_db(app, database_path=''):
     app.config.from_object('config')
-    app.config["SQLALCHEMY_DATABASE_URI"] = database_path if len(database_path) > 0 else app.config["SQLALCHEMY_DATABASE_URI"]
+    app.config["SQLALCHEMY_DATABASE_URI"] = database_path \
+        if len(database_path) > 0 else app.config["SQLALCHEMY_DATABASE_URI"]
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.app = app
     db.init_app(app)
