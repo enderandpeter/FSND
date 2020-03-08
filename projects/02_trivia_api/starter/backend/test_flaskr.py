@@ -55,6 +55,10 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data[0]['type'], "Science")
         self.assertEqual(len(data), 6)
 
+        self.dropTables()
+        res = self.client().get('/categories')
+        self.assertEqual(res.status_code, 400)
+
 
     def test_get_questions(self):
         """Questions can be retrieved """
@@ -65,6 +69,9 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['questions'][0]['answer'], "Maya Angelou")
         self.assertEqual(len(data['questions']), QUESTIONS_PER_PAGE)
 
+        self.dropTables()
+        res = self.client().get('/questions')
+        self.assertEqual(res.status_code, 400)
 
     def test_delete_question(self):
         """A question can be deleted"""
@@ -72,9 +79,13 @@ class TriviaTestCase(unittest.TestCase):
         id = question.id
         res = self.client().delete(f'/questions/{id}')
         self.assertEqual(res.status_code, 200)
-        # The follow line causes the terminal to hang and not respond to key interrupts
-        # deleted_question = Question.query.get(id)
-        # self.assertIsNone(deleted_question)
+
+        res = self.client().delete(f'/questions/{id}')
+        self.assertEqual(res.status_code, 404)
+
+        self.dropTables()
+        res = self.client().delete(f'/questions/{id}')
+        self.assertEqual(res.status_code, 400)
 
     def test_search_questions(self):
         """Questions can be searched"""
@@ -83,6 +94,12 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         data = json.loads(res.data)
         self.assertEqual(data['total_questions'], 8)
+
+        res = self.client().post('/questions/search', json={'searchterm': search_term})
+        self.assertEqual(res.status_code, 422)
+
+        res = self.client().post('/questions/search', json={'search_term': ''})
+        self.assertEqual(res.status_code, 422)
 
     def test_get_questions_by_cat(self):
         """Questions can be retrieved by category"""
@@ -93,9 +110,61 @@ class TriviaTestCase(unittest.TestCase):
         for question in data['questions']:
             self.assertEqual(question['category']['id'], 3)
 
+        res = self.client().get(f'/categories/5000/questions')
+        self.assertEqual(res.status_code, 404)
+
+        self.dropTables()
+        res = self.client().get(f'/categories/{category_id}/questions')
+        self.assertEqual(res.status_code, 400)
+
     def test_quizzes(self):
         """Quizzes work as expected"""
+        categories = Category.query.all()
+        for category in categories:
+            category_questions = Question.query.filter(category.id == Question.category_id).all()
+            category_question_ids = [question.id for question in category_questions]
 
+            previous_questions = []
+            last_question_id = 0
+            for question_id in category_question_ids:
+                res = self.client().post('/quizzes', json={
+                    "previous_questions": previous_questions,
+                    "quiz_category": {
+                        "type": category.type,
+                        "id": category.id
+                    }
+                })
+                data = json.loads(res.data)
+                last_question_id = data['question']['id']
+                self.assertNotIn(last_question_id, previous_questions)
+                previous_questions.append(last_question_id)
+
+        res = self.client().post('/quizzes', json={
+            "previousquestions": [],
+            "quiz_category": {
+                "type": "Something",
+                "id": 1
+            }
+        })
+        self.assertEqual(res.status_code, 422)
+
+        res = self.client().post('/quizzes', json={
+            "previous_questions": [],
+            "quiz_category": {
+                "type": "Something",
+            }
+        })
+        self.assertEqual(res.status_code, 422)
+
+        self.dropTables()
+        res = self.client().post('/quizzes', json={
+            "previous_questions": [],
+            "quiz_category": {
+                "type": "Something",
+                "id": 1
+            }
+        })
+        self.assertEqual(res.status_code, 400)
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

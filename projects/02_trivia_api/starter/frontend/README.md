@@ -17,7 +17,7 @@
 4. Copy `config.py.example` to `config.py` and set the DB URI for the main and test DBs
 5. Run `flask run`. The tables will be created
 6. Run a command like `psql trivia < trivia_data.psql` or `psql -d [dbname] -f trivia_data.psql` to seed the DB
-7. Make a request to `/questions` on the backend server to confirm it is ready
+7. Run the tests to confirm that the backend is ready
 
 ### Frontend
 1. Go to the `frontend` folder
@@ -56,7 +56,7 @@ The base types are all standard JSON types
 
 #### Examples
 ##### Bad Request
-The request was formatted in a way that the application could not make sense of
+The request was formatted in a way that the application could not make sense of... or maybe something else happened.
 ```json
 {
     "code": 400,
@@ -74,7 +74,7 @@ The request has missing or invalid data.
 ```
 
 ##### Not Found
-The request for something that the application cannot find
+The request was for something that the application could not find
 ```json
 {
     "code": 404,

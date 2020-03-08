@@ -124,7 +124,7 @@ def create_app(test_config=None):
             if len(search_term.strip()) == 0:
                 raise UnprocessableEntity
             questions = Question.query.filter(Question.question.ilike(f'%{search_term}%')).all()
-        except (ValueError, UnprocessableEntity):
+        except (KeyError, UnprocessableEntity):
             abort(422)
         except Exception:
             print(sys.exc_info())
@@ -170,7 +170,7 @@ def create_app(test_config=None):
                 question_query = question_query.filter(Question.category_id == quiz_category['id'])
 
             question = question_query.order_by(func.random()).first()
-        except ValueError:
+        except KeyError:
             abort(422)
         except Exception:
             print(sys.exc_info())
