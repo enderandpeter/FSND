@@ -1,0 +1,14 @@
+import os
+
+# Grabs the folder where the script runs.
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+# A database URL
+SQLALCHEMY_DATABASE_URI = 'postgres://postgres:postgres@localhost/coffeeshop'
+
+# Auth settings
+AUTH0_DOMAIN = 'udacity-fsnd.auth0.com'
+ALGORITHMS = ['RS256']
+API_AUDIENCE = 'dev'
