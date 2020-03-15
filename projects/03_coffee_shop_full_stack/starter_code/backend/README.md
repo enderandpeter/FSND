@@ -1,3 +1,25 @@
+# My Coffee Shop Backend
+
+## Requirements
+
+Tested on:
+
+* Python 3.7
+* Postgres 12.1
+
+# Installation
+
+* Run `pip install -r requirements.txt`
+* Set the following environment variables:
+  * `FLASK_APP=api.py`
+* Copy `config.py.example` to `config.py` and set things as appropriate, such as the DB URL to be used and the Auth settings.
+* Create the database
+* Go to the `src` folder
+* Run `flask db upgrade` to create the table(s)
+* Run `flask run` to start the development server. `flask run --reload` will rebuild the site if files are changed.
+
+# Original Readme
+
 # Coffee Shop Backend
 
 ## Getting Started
