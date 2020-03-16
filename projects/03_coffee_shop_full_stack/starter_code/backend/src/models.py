@@ -6,11 +6,13 @@ import json
 db = SQLAlchemy()
 
 
-def setup_db(app):
+def setup_db(app, database_path=''):
     """
     Binds a flask application and a SQLAlchemy service
     """
     app.config.from_object('config')
+    app.config["SQLALCHEMY_DATABASE_URI"] = database_path \
+        if len(database_path) > 0 else app.config["SQLALCHEMY_DATABASE_URI"]
     migrate = Migrate(app, db)
     db.app = app
     db.init_app(app)

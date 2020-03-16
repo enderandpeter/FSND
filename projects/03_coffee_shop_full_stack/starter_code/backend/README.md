@@ -18,6 +18,10 @@ Tested on:
 * Run `flask db upgrade` to create the table(s)
 * Run `flask run` to start the development server. `flask run --reload` will rebuild the site if files are changed.
 
+# Tests
+
+Run the tests with `python src/test.py`
+
 # Original Readme
 
 # Coffee Shop Backend
