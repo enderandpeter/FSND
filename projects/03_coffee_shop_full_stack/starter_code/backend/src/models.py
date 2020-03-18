@@ -61,24 +61,44 @@ class Model:
         return json.dumps(self.format())
 
 
+DRINK_TITLE_MAX = 80
+DRINK_RECIPE_MAX = 180
+
 class Drink(Model, db.Model):
     """
     A persistent drink entity
     """
-
     __tablename__ = 'drinks'
     # Autoincrementing, unique primary key
     id = Column(Integer(), primary_key=True)
     # String Title
-    title = Column(String(80), unique=True)
+    title = Column(String(DRINK_TITLE_MAX), unique=True)
     # the ingredients blob - this stores a lazy json blob
     # the required datatype is [{'color': string, 'name':string, 'parts':number}]
-    recipe = Column(String(180), nullable=False)
+    recipe = Column(String(DRINK_RECIPE_MAX), nullable=False)
 
-    def format(self):
+    '''
+        short()
+            short form representation of the Drink model
+        '''
+
+    def short(self):
+        print(json.loads(self.recipe))
         short_recipe = [{'color': r['color'], 'parts': r['parts']} for r in json.loads(self.recipe)]
         return {
             'id': self.id,
             'title': self.title,
             'recipe': short_recipe
+        }
+
+    '''
+    long()
+        long form representation of the Drink model
+    '''
+
+    def long(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'recipe': json.loads(self.recipe)
         }
