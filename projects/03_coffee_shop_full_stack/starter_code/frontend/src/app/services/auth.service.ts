@@ -72,6 +72,8 @@ export class AuthService {
     this.token = '';
     this.payload = null;
     this.set_jwt();
+    const returnToUrl = `${this.callbackURL}/tabs/user-page`;
+    window.location.href = `https://${this.url}.auth0.com/v2/logout?returnTo=${returnToUrl}&client_id=${this.clientId}`;
   }
 
   can(permission: string) {

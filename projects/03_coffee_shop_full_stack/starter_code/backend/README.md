@@ -7,7 +7,7 @@ Tested on:
 * Python 3.7
 * Postgres 12.1
 
-# Installation
+# Installation and Deployment
 
 * Run `pip install -r requirements.txt`
 * Set the following environment variables:
@@ -20,7 +20,7 @@ Tested on:
 
 # Tests
 
-Run the tests with `python src/test.py`
+Import the Postman collection file `udacity-fsnd-udaspicelatte.postman_collection.json`
 
 # Original Readme
 
